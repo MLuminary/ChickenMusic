@@ -1,3 +1,3 @@
-# 仓鼠音乐
+# ChickenMusic
 
-:hamster: 吱吱吱！
+:baby_chick: 
