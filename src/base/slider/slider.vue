@@ -121,6 +121,10 @@ export default {
         this.slider.next(this.speed)
       }, this.interval)
     }
+  },
+  // 页面切走时会触发
+  destroyed() {
+    clearTimeout(this.timer)
   }
 }
 </script>
