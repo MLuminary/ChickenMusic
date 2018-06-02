@@ -18,7 +18,7 @@
           <ul>
             <li v-for="item in discList" :key="item" class="item">
               <div class="icon">
-                <img width="60" :src="item.imgurl">
+                <img width="60" v-lazy="item.imgurl">
               </div>
               <div class="text">
                 <h2 class="name" v-html="item.creator.name"></h2>
