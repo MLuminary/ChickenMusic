@@ -1,10 +1,11 @@
 <template>
   <div class="singer">
-
+    <list-view :data="singers"></list-view>
   </div>
 </template>
 
 <script type="text/ecmascriot-6">
+import ListView from 'base/listview/listview'
 import { getSingerList } from 'api/singer'
 import { ERR_OK } from 'api/config'
 import Singer from 'common/js/singer'
@@ -18,6 +19,9 @@ export default {
       singers: []
     }
   },
+  components: {
+    ListView
+  },
   mounted() {
     this._getSingerList()
   },
@@ -26,7 +30,7 @@ export default {
       getSingerList().then(res => {
         if (res.code === ERR_OK) {
           this.singers = res.data.list
-          this._normalizeSinger(this.singers)
+          this.singers = this._normalizeSinger(this.singers)
         }
       })
     },
@@ -67,6 +71,8 @@ export default {
       }
       // 排序
       ret.sort((a, b) => a.title.charCodeAt(0) - b.title.charCodeAt(0))
+
+      return hot.concat(ret)
     }
   }
 }
