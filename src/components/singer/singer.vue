@@ -6,9 +6,17 @@
 
 <script type="text/ecmascriot-6">
 import { getSingerList } from 'api/singer'
+import { ERR_OK } from 'api/config'
+import Singer from 'common/js/singer'
+
+const HOT_NAME = '热门'
+const HOT_SINGER_LEN = 10
+
 export default {
   data() {
-    return {}
+    return {
+      singers: []
+    }
   },
   mounted() {
     this._getSingerList()
@@ -16,8 +24,49 @@ export default {
   methods: {
     _getSingerList() {
       getSingerList().then(res => {
-        console.log(res)
+        if (res.code === ERR_OK) {
+          this.singers = res.data.list
+          this._normalizeSinger(this.singers)
+        }
       })
+    },
+    // 规范数组
+    _normalizeSinger(list) {
+      let map = {
+        hot: {
+          title: HOT_NAME,
+          items: []
+        }
+      }
+      list.forEach((item, index) => {
+        // 十个热门的歌手
+        if (index < HOT_SINGER_LEN) {
+          map.hot.items.push(new Singer(item.Fsinger_mid, item.Fsinger_name))
+        }
+        // 按 ABCD 索引归类好剩下的歌手
+        if (!map[item.Findex]) {
+          map[item.Findex] = {
+            title: item.Findex,
+            items: []
+          }
+        }
+        map[item.Findex].items.push(
+          new Singer(item.Fsinger_mid, item.Fsinger_name)
+        )
+      })
+      // 处理 map 得到有序的列表
+      let hot = []
+      let ret = []
+      for (let key in map) {
+        let val = map[key]
+        if (val.title.match(/[a-zA-Z]/)) {
+          ret.push(val)
+        } else if (val.title === HOT_NAME) {
+          hot.push(val)
+        }
+      }
+      // 排序
+      ret.sort((a, b) => a.title.charCodeAt(0) - b.title.charCodeAt(0))
     }
   }
 }
