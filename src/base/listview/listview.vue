@@ -18,15 +18,22 @@
         </li>
       </ul>
     </div>
+    <div class="list-fixed" v-show="fixedTitle" ref="fixed">
+      <h1 class="fixed-title">{{fixedTitle}}</h1>
+    </div>
+    <div v-show="!data.length" class="loading-container">
+      <loading></loading>
+    </div>
   </scroll>
 </template>
 
 <script type="text/ecmascript-6">
 import Scroll from 'base/scroll/scroll'
 import { getData } from 'common/js/dom'
-// import Loading from 'base/loading/loading'
+import Loading from 'base/loading/loading'
 
 const ANCHOR_HEIGHT = 18 // list-shortcut 中 item 的高度
+const TITLE_HEIGHT = 30 // title 的高度
 
 export default {
   created() {
@@ -43,12 +50,14 @@ export default {
     }
   },
   components: {
-    Scroll
+    Scroll,
+    Loading
   },
   data() {
     return {
-      scrollY: -1,
-      currentIndex: 0
+      scrollY: -1, // 此时滑动的 y 坐标
+      currentIndex: 0, // 此时展现的模块 index
+      diff: 0 // 滑动 y 坐标距离当前模块底部的距离
     }
   },
   computed: {
@@ -56,6 +65,14 @@ export default {
       return this.data.map(group => {
         return group.title.substr(0, 1)
       })
+    },
+    fixedTitle() {
+      if (this.scrollY > 0) {
+        return ''
+      }
+      return this.data[this.currentIndex]
+        ? this.data[this.currentIndex].title
+        : ''
     }
   },
   methods: {
@@ -79,11 +96,13 @@ export default {
       if (!index && index !== 0) {
         return
       }
+      // 边界判定
       if (index < 0) {
         index = 0
       } else if (index > this.listHeight.length - 2) {
         index = this.listHeight.length - 2
       }
+      // 更改 scrollY 便会引起监听函数的执行
       this.scrollY = -this.listHeight[index]
       this.$refs.listview.scrollToElement(this.$refs.listGroup[index], 0) // 0 为动画的滚动时间
     },
@@ -124,11 +143,18 @@ export default {
         // 右边注意要开
         if (-newY >= heightTop && -newY < heightDown) {
           this.currentIndex = i
+          this.diff = heightDown + newY // 此时滑动量 y 距离此模块底部的距离
           return
         }
       }
       //  当滚动到底部时，且 -newY 大于最后一个元素的上限
       this.currentIndex = listHeight.length - 2
+    },
+    diff(newVal) {
+      let fixedTop =
+        newVal > 0 && newVal < TITLE_HEIGHT ? newVal - TITLE_HEIGHT : 0
+
+      this.$refs.fixed.style.transform = `translate3d(0,${fixedTop}px,0)`
     }
   }
 }
