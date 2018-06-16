@@ -75,6 +75,16 @@ export default {
       this._scrollTo(anchorIndex)
     },
     _scrollTo(index) {
+      // 此方法并不会触发 scroll 事件
+      if (!index && index !== 0) {
+        return
+      }
+      if (index < 0) {
+        index = 0
+      } else if (index > this.listHeight.length - 2) {
+        index = this.listHeight.length - 2
+      }
+      this.scrollY = -this.listHeight[index]
       this.$refs.listview.scrollToElement(this.$refs.listGroup[index], 0) // 0 为动画的滚动时间
     },
     scroll(pos) {
@@ -111,14 +121,14 @@ export default {
       for (let i = 0; i < listHeight.length - 1; i++) {
         let heightTop = listHeight[i]
         let heightDown = listHeight[i + 1]
-        if (-newY >= heightTop && -newY <= heightDown) {
+        // 右边注意要开
+        if (-newY >= heightTop && -newY < heightDown) {
           this.currentIndex = i
           return
         }
       }
       //  当滚动到底部时，且 -newY 大于最后一个元素的上限
       this.currentIndex = listHeight.length - 2
-
     }
   }
 }
