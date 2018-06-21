@@ -11,7 +11,7 @@ export default class Song {
   }
 }
 
-export function createSong(musicData) {
+export function createSong(musicData, songVkey) {
   return new Song({
     id: musicData.songid,
     mid: musicData.mid,
@@ -21,8 +21,10 @@ export function createSong(musicData) {
     duration: musicData.duration,
     image: `https://y.gtimg.cn/music/photo_new/T002R300x300M000${
       musicData.albummid
-    }?max_age=2592000`,
-    url: `http://thirdparty.gtimg.com/C100${musicData.songmid}.m4a?fromtag=38`
+    }.jpg?max_age=2592000`,
+    url: `http://dl.stream.qqmusic.qq.com/C400${
+      musicData.songmid
+    }.m4a?vkey=${songVkey}&guid=2180150330&uin=0&fromtag=66`
   })
 }
 

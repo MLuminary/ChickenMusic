@@ -10,6 +10,7 @@ import { mapGetters } from 'vuex'
 import { ERR_OK } from 'api/config'
 import { getSingerDetail } from 'api/singer'
 import { createSong } from 'common/js/song'
+import { getMusicSource } from 'api/song'
 
 export default {
   data() {
@@ -43,8 +44,14 @@ export default {
       list.forEach(item => {
         // 将 item 中的 musicData 解构出来
         let { musicData } = item
+        // 当 musicData 获得时
         if (musicData.songid && musicData.albummid) {
-          ret.push(createSong(musicData))
+          getMusicSource(musicData.songmid).then(res => {
+            if (res.code === ERR_OK) {
+              const songVkey = res.data.items[0].vkey
+              ret.push(createSong(musicData, songVkey))
+            }
+          })
         }
       })
       return ret

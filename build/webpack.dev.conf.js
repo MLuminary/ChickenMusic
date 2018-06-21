@@ -56,6 +56,8 @@ const devWebpackConfig = merge(baseWebpackConfig, {
         host: 'c.y.qq.com'
       }
       // 本地代理
+
+      // 获取歌单
       app.get('/api/getDiscList', function(req, res) {
         // qq 音乐歌单 api 地址
         const url =
@@ -72,6 +74,28 @@ const devWebpackConfig = merge(baseWebpackConfig, {
           })
           .then(response => {
             // 获取到 qq 音乐的数据并以 json 格式返回
+            res.json(response.data)
+          })
+          .catch(e => {
+            console.log(e)
+          })
+      })
+
+      app.get('/api/getSongVkey', function(req, res) {
+        // qq 音乐获取 vkey
+        const url =
+          'https://c.y.qq.com/base/fcgi-bin/fcg_music_express_mobile3.fcg'
+
+        // 修改请求头去获取数据
+        axios
+          .get(url, {
+            headers: {
+              referer: ReqHeader.referer,
+              host: ReqHeader.host
+            },
+            params: req.query // 将发送过来的数据接收再当参数传递
+          })
+          .then(response => {
             res.json(response.data)
           })
           .catch(e => {
