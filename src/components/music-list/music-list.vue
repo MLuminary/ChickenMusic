@@ -1,15 +1,25 @@
 <template>
   <div class="music-list">
-    <div class="back">
+    <div class="back" @click="back">
       <i class="icon-back"></i>
     </div>
     <h1 class="title" v-html="title"></h1>
     <div class="bg-image" :style="bgStyle" ref="bgImage">
-      <div class="filter"></div>
+      <div class="play-wrapper">
+        <div class="play" v-show="songs.length > 0" ref="playBtn">
+          <i class="icon-play"></i>
+          <span class="text">随机播放全部</span>
+        </div>
+      </div>
+      <div class="filter" ref="filter"></div>
     </div>
-    <scroll :data="songs" class="list" ref="list">
+    <div class="bg-layer" ref="layer"></div>
+    <scroll :data="songs" class="list" ref="list" @scroll="scroll" :probe-type="probeType" :listen-scroll="listenScroll">
       <div class="song-list-wrapper">
         <song-list :songs="songs"></song-list>
+      </div>
+      <div class="loading-conatainer" v-show="!songs.length">
+        <loading></loading>
       </div>
     </scroll>
   </div>
@@ -18,8 +28,19 @@
 <script type="text/ecmascript-6">
 import SongList from 'base/song-list/song-list'
 import Scroll from 'base/scroll/scroll'
+import { prefixStyle } from 'common/js/dom'
+import Loading from 'base/loading/loading'
+
+const RESERVER_HEIGHT = 40
+const transform = prefixStyle('transform')
+const backdrop = prefixStyle('backdrop-filter')
 
 export default {
+  data() {
+    return {
+      scrollY: 0
+    }
+  },
   props: {
     bgImage: {
       type: String,
@@ -36,16 +57,63 @@ export default {
   },
   components: {
     SongList,
-    Scroll
+    Scroll,
+    Loading
   },
   computed: {
     bgStyle() {
       return `background-image:url(${this.bgImage})`
     }
   },
+  created() {
+    this.probeType = 3
+    this.listenScroll = true
+  },
   mounted() {
+    this.imageHeight = this.$refs.bgImage.clientHeight
+    this.minTranslateY = -this.imageHeight + RESERVER_HEIGHT
     // 如果 ref 设置的为组件时，需要用 $el 获取其 dom
     this.$refs.list.$el.style.top = `${this.$refs.bgImage.clientHeight}px`
+  },
+  methods: {
+    scroll(pos) {
+      this.scrollY = pos.y
+    },
+    back() {
+      this.$router.back()
+    }
+  },
+  watch: {
+    scrollY(newY) {
+      let translateY = Math.max(newY, this.minTranslateY)
+      let zIndex = 0
+      let scale = 1 // 图片放大
+      let blur = 0 // 高斯模糊
+      this.$refs.layer.style[transform] = `translate3d(0,${translateY}px,0)`
+      const percent = Math.abs(newY / this.imageHeight)
+      if (newY > 0) {
+        scale = 1 + percent
+        zIndex = 10
+      } else {
+        blur = Math.min(20 * percent, 20)
+      }
+
+      this.$refs.filter.style[backdrop] = `blur(${blur}px)`
+
+      if (newY < this.minTranslateY) {
+        zIndex = 10
+        this.$refs.bgImage.style.paddingTop = 0
+        this.$refs.bgImage.style.height = RESERVER_HEIGHT + 'px'
+        this.$refs.playBtn.style.display = 'none'
+      } else {
+        this.$refs.bgImage.style.paddingTop = '70%'
+        this.$refs.bgImage.style.height = 0
+        this.$refs.playBtn.style.display = 'none'
+      }
+
+      this.$refs.bgImage.style.zIndex = zIndex
+      this.$refs.bgImage.style[transform] = `scale(${scale})`
+    }
   }
 }
 </script>
@@ -53,7 +121,6 @@ export default {
 <style lang="stylus" scoped rel="stylesheet/stylus">
 @import '~common/stylus/variable'
 @import '~common/stylus/mixin'
-
 .music-list
   position fixed
   z-index 100
