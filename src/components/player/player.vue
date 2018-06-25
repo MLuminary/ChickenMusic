@@ -59,7 +59,9 @@
           <p class="desc" v-html="currentSong.singer"></p>
         </div>
         <div class="control">
-          <i :class="miniIcon" @click.stop="togglePlaying"></i>
+          <progress-circle :radius="radius" :percent="percent">
+            <i :class="miniIcon" @click.stop="togglePlaying" class="icon-mini"></i>
+          </progress-circle>
         </div>
         <div class="control">
           <i class="icon-playlist"></i>
@@ -75,15 +77,16 @@ import { mapGetters, mapMutations } from 'vuex'
 import animations from 'create-keyframe-animation'
 import { prefixStyle } from 'common/js/dom'
 import ProgressBar from 'base/progress-bar/progress-bar'
+import ProgressCircle from 'base/progress-circle/progress-circle'
 
 const transform = prefixStyle('transform')
 
 export default {
   data() {
     return {
-      // 避免点击过快
-      songReady: false,
-      currentTime: 0
+      songReady: false, // 避免点击过快
+      currentTime: 0, // 当前音乐播放的时间
+      radius: 32
     }
   },
   computed: {
@@ -102,10 +105,17 @@ export default {
     percent() {
       return this.currentTime / this.currentSong.duration
     },
-    ...mapGetters(['fullScreen', 'playList', 'currentSong', 'playing', 'currentIndex'])
+    ...mapGetters([
+      'fullScreen',
+      'playList',
+      'currentSong',
+      'playing',
+      'currentIndex'
+    ])
   },
   components: {
-    ProgressBar
+    ProgressBar,
+    ProgressCircle
   },
   watch: {
     currentSong() {
@@ -179,7 +189,7 @@ export default {
     format(interval) {
       // 向下取整
       interval = interval | 0
-      const minute = interval / 60 | 0
+      const minute = (interval / 60) | 0
       const second = this._pad(interval % 60)
       return `${minute}:${second}`
     },
@@ -259,7 +269,7 @@ export default {
 @import '~common/stylus/variable'
 @import '~common/stylus/mixin'
 .player
-  touch-action: none;
+  touch-action none
   .normal-player
     position fixed
     left 0
