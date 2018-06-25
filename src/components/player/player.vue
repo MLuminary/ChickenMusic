@@ -154,7 +154,7 @@ export default {
         list = this.sequenceList
       }
       this.resetCurrentIndex(list)
-      this.setSequenceList(list)
+      this.setPlayList(list) // 将此时的 sequenceList 设为 playList
     },
     // 保证切换模式的时候歌曲保持不变
     resetCurrentIndex(list) {
@@ -177,7 +177,7 @@ export default {
       setPlayingState: 'SET_PLAYING_STATE',
       setCurrentIndex: 'SET_CURRENT_INDEX',
       setPlayMode: 'SET_PLAY_MODE',
-      setSequenceList: 'SET_SEQUENCE_LIST'
+      setPlayList: 'SET_PLAYLIST'
     }),
     next() {
       if (!this.songReady) {
