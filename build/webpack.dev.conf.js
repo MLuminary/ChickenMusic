@@ -96,12 +96,43 @@ const devWebpackConfig = merge(baseWebpackConfig, {
             params: req.query // 将发送过来的数据接收再当参数传递
           })
           .then(response => {
+            // get qq 音乐 vkey
             res.json(response.data)
           })
           .catch(e => {
             console.log(e)
           })
       })
+
+      // 获取 qq 音乐歌词
+      app.get('/api/lyric', function(req, res) {
+        const url = 'https://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric_new.fcg'
+
+        // 修改请求头
+        axios
+          .get(url, {
+            headers: {
+              referer: ReqHeader.referer,
+              host: ReqHeader.host
+            },
+            params: req.query
+          })
+          .then(response => {
+            var ret = response.data
+            if (typeof ret === 'string') {
+              var reg = /^\w+\(({[^()]+})\)$/ // 用来匹配 jsonp 字符串
+              var matches = ret.match(reg)
+              if (matches) {
+                ret = JSON.parse(matches[1])
+              }
+            }
+            res.json(ret)
+          })
+          .catch(e => {
+            console.log(e)
+          })
+      })
+
     }
   },
   plugins: [
