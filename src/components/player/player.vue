@@ -80,6 +80,7 @@ import ProgressBar from 'base/progress-bar/progress-bar'
 import ProgressCircle from 'base/progress-circle/progress-circle'
 import { playMode } from 'common/js/config'
 import { shuffle } from 'common/js/util'
+import Lyric from 'lyric-parser'
 
 const transform = prefixStyle('transform')
 
@@ -88,7 +89,8 @@ export default {
     return {
       songReady: false, // 避免点击过快
       currentTime: 0, // 当前音乐播放的时间
-      radius: 32
+      radius: 32,
+      currentLyric: null // 当前歌词
     }
   },
   computed: {
@@ -108,7 +110,9 @@ export default {
       return this.currentTime / this.currentSong.duration
     },
     iconMode() {
-      return this.mode === playMode.sequence ? 'icon-sequence' : this.mode === playMode.loop ? 'icon-loop' : 'icon-random'
+      return this.mode === playMode.sequence
+        ? 'icon-sequence'
+        : this.mode === playMode.loop ? 'icon-loop' : 'icon-random'
     },
     ...mapGetters([
       'fullScreen',
@@ -132,7 +136,7 @@ export default {
       }
       this.$nextTick(() => {
         this.$refs.audio.play()
-        this.currentSong.getLyric()
+        this.getLyric()
       })
     },
     playing(newPlaying) {
@@ -143,6 +147,12 @@ export default {
     }
   },
   methods: {
+    getLyric() {
+      this.currentSong.getLyric().then(lyric => {
+        this.currentLyric = new Lyric(lyric)
+        console.log(this.currentLyric)
+      })
+    },
     // 改变播放模式
     changeMode() {
       const mode = (this.mode + 1) % 3
@@ -160,7 +170,7 @@ export default {
     // 保证切换模式的时候歌曲保持不变
     resetCurrentIndex(list) {
       // 找到当前播放歌曲的索引
-      let index = list.findIndex((item) => {
+      let index = list.findIndex(item => {
         return item.id === this.currentSong.id
       })
       this.setCurrentIndex(index)
