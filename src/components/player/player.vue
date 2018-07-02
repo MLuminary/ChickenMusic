@@ -20,6 +20,17 @@
               </div>
             </div>
           </div>
+          <scroll class="middle-r" ref="lyricList" :data="currentLyric && currentLyric.lines">
+            <div class="lyric-wrapper">
+              <div v-if="currentLyric">
+                <p ref="lyricLine"
+                  v-for="(line, index) in currentLyric.lines"
+                  :key="index"
+                  :class="{'current': currentLineNum === index}"
+                  class="text">{{line.txt}}</p>
+              </div>
+            </div>
+          </scroll>
         </div>
         <div class="bottom">
           <div class="progress-wrapper">
@@ -81,6 +92,7 @@ import ProgressCircle from 'base/progress-circle/progress-circle'
 import { playMode } from 'common/js/config'
 import { shuffle } from 'common/js/util'
 import Lyric from 'lyric-parser'
+import Scroll from 'base/scroll/scroll'
 
 const transform = prefixStyle('transform')
 
@@ -90,7 +102,8 @@ export default {
       songReady: false, // 避免点击过快
       currentTime: 0, // 当前音乐播放的时间
       radius: 32,
-      currentLyric: null // 当前歌词
+      currentLyric: null, // 当前歌词
+      currentLineNum: 0 // 当前歌词所在行
     }
   },
   computed: {
@@ -126,7 +139,8 @@ export default {
   },
   components: {
     ProgressBar,
-    ProgressCircle
+    ProgressCircle,
+    Scroll
   },
   watch: {
     currentSong(newSong, oldSong) {
@@ -149,9 +163,25 @@ export default {
   methods: {
     getLyric() {
       this.currentSong.getLyric().then(lyric => {
-        this.currentLyric = new Lyric(lyric)
-        console.log(this.currentLyric)
+        // this.currentLyric 改变后调用 handleLyric
+        // 内置定时器，根据 Lyric 中的 time 改变歌词中的 Line
+        this.currentLyric = new Lyric(lyric, this.handleLyric)
+        if (this.playing) {
+          this.currentLyric.play()
+        }
       })
+    },
+    handleLyric({lineNum, txt}) {
+      this.currentLineNum = lineNum
+      // 歌词滚动
+      if (lineNum > 5) {
+        // 当滚动歌词超过5行时，歌词头部移动到当前歌词的上面5个，来保证当前播放的歌词在中央
+        let lineEl = this.$refs.lyricLine[lineNum - 5]
+        this.$refs.lyricList.scrollToElement(lineEl, 1000)
+      } else {
+        // 当歌词行数小于 5 行，每次调动回到当前位置
+        this.$refs.lyricList.scrollTo(0, 0, 1000)
+      }
     },
     // 改变播放模式
     changeMode() {
