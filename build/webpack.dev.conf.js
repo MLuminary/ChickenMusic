@@ -133,6 +133,27 @@ const devWebpackConfig = merge(baseWebpackConfig, {
           })
       })
 
+      // 根据歌单 id 获取歌单中歌曲
+      app.get('/api/getSongList', function(req, res) {
+        const url =
+          'https://c.y.qq.com/qzone/fcg-bin/fcg_ucc_getcdinfo_byids_cp.fcg'
+
+        // 修改请求头
+        axios
+          .get(url, {
+            headers: {
+              referer: ReqHeader.referer,
+              host: ReqHeader.host
+            },
+            params: req.query
+          })
+          .then(response => {
+            res.json(response.data)
+          })
+          .catch(e => {
+            console.log(e)
+          })
+      })
     }
   },
   plugins: [

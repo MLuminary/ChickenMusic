@@ -16,7 +16,7 @@
         <div class="recommend-list">
           <h1 class="list-title">热门歌单推荐</h1>
           <ul>
-            <li v-for="(item, index) in discList" :key="index" class="item">
+            <li @click="selectItem(item)" v-for="(item, index) in discList" :key="index" class="item">
               <div class="icon">
                 <img width="60" v-lazy="item.imgurl">
               </div>
@@ -44,6 +44,7 @@ import Slider from 'base/slider/slider'
 import { getRecommend, getDiscList } from 'api/recommend'
 import { ERR_OK } from 'api/config'
 import { playListMixin } from 'common/js/mixin'
+import { mapMutations } from 'vuex'
 
 export default {
   mixins: [playListMixin],
@@ -63,6 +64,18 @@ export default {
     this._getDiscList()
   },
   methods: {
+    ...mapMutations({
+      setDisc: 'SET_DISC'
+    }),
+    // 跳到歌单详情页
+    selectItem(item) {
+      this.$router.push({
+        path: `/recommend/${item.dissid}`
+      })
+      // 将 item 添加到 vuex 中的 disc 中
+      this.setDisc(item)
+    },
+    // 如果有 playList 时滑动区域需要少 60px
     handlePlayList(playList) {
       const bottom = playList.length > 0 ? '60px' : ''
       this.$refs.recommend.style.bottom = bottom

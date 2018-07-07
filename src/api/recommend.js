@@ -1,6 +1,7 @@
 import jsonp from 'common/js/jsonp'
 import { commonParams, options } from './config'
 import axios from 'axios'
+import { Object } from 'core-js'
 
 // 获取轮播图图片
 export function getRecommend() {
@@ -38,6 +39,31 @@ export function getDiscList() {
     })
     .then(res => {
       // 返回一个 Promise 对象
+      return Promise.resolve(res.data)
+    })
+}
+
+// 获取歌单详细内容
+export function getSongList(disstid) {
+  const url = '/api/getSongList'
+
+  const data = Object.assign({}, commonParams, {
+    type: 1,
+    json: 1,
+    utf8: 1,
+    onlysong: 0,
+    disstid,
+    format: 'json',
+    g_tk: 1132671320,
+    platform: 'yqq',
+    needNewCode: 0
+  })
+
+  return axios
+    .get(url, {
+      params: data
+    })
+    .then(res => {
       return Promise.resolve(res.data)
     })
 }
