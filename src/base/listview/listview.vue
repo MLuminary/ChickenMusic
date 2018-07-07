@@ -110,6 +110,9 @@ export default {
       this.scrollY = -this.listHeight[index]
       this.$refs.listview.scrollToElement(this.$refs.listGroup[index], 0) // 0 为动画的滚动时间
     },
+    refresh() {
+      this.$refs.listview.refresh()
+    },
     scroll(pos) {
       this.scrollY = pos.y // 获取滚动的 y
     },

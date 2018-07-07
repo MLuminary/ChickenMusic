@@ -31,12 +31,15 @@ import Scroll from 'base/scroll/scroll'
 import { prefixStyle } from 'common/js/dom'
 import Loading from 'base/loading/loading'
 import { mapActions } from 'vuex'
+import { playListMixin } from 'common/js/mixin'
 
 const RESERVER_HEIGHT = 40
 const transform = prefixStyle('transform')
 const backdrop = prefixStyle('backdrop-filter')
 
 export default {
+  // 和组件的方法有 Merage 行为
+  mixins: [playListMixin],
   data() {
     return {
       scrollY: 0
@@ -77,6 +80,11 @@ export default {
     this.$refs.list.$el.style.top = `${this.$refs.bgImage.clientHeight}px`
   },
   methods: {
+    handlePlayList(playList) {
+      const bottom = playList.length > 0 ? '60px' : ''
+      this.$refs.list.$el.style.bottom = bottom
+      this.$refs.list.refresh()
+    },
     scroll(pos) {
       this.scrollY = pos.y
     },

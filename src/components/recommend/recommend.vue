@@ -1,5 +1,5 @@
 <template>
-  <div class="recommend">
+  <div class="recommend" ref="recommend">
     <!-- 当 discList 有数值的时候需要重新初始化滚动组件，因为没有数据的话是不需要滚动的 -->
     <scroll ref="scroll" :data="discList" class="recommend-content">
       <!-- 获取到真实数据后再去操作数据 -->
@@ -43,8 +43,10 @@ import Scroll from 'base/scroll/scroll'
 import Slider from 'base/slider/slider'
 import { getRecommend, getDiscList } from 'api/recommend'
 import { ERR_OK } from 'api/config'
+import { playListMixin } from 'common/js/mixin'
 
 export default {
+  mixins: [playListMixin],
   data() {
     return {
       recommends: [],
@@ -61,6 +63,11 @@ export default {
     this._getDiscList()
   },
   methods: {
+    handlePlayList(playList) {
+      const bottom = playList.length > 0 ? '60px' : ''
+      this.$refs.recommend.style.bottom = bottom
+      this.$refs.scroll.refresh()
+    },
     // 获取轮播图图片数据
     _getRecommend() {
       getRecommend().then(res => {
