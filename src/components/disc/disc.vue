@@ -34,11 +34,13 @@ export default {
     this._getSongList()
   },
   methods: {
+
     _getSongList() {
       if (!this.disc.dissid) {
         this.$router.push('/recommend')
         return
       }
+      // 获得歌单歌曲
       getSongList(this.disc.dissid).then(res => {
         if (res.code === ERR_OK) {
           this.songs = this._normalizeSongs(res.cdlist[0].songlist)
@@ -47,6 +49,7 @@ export default {
     },
     _normalizeSongs(list) {
       let ret = []
+      // 将歌单歌曲转为 song 类
       list.forEach(musicData => {
         if (musicData.songid && musicData.albummid) {
           getMusicSource(musicData.songmid).then(res => {
