@@ -12,3 +12,4 @@ export const currentIndex = state => state.currentIndex
 export const currentSong = state => state.playList[state.currentIndex] || {}
 
 export const disc = state => state.disc
+export const toplist = state => state.toplist
