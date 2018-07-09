@@ -29,7 +29,7 @@ export default {
   created() {
     // 监听 query，当 query 改变时传递 query 字符
     this.$watch('query', newQuery => {
-      this.$emil('query', newQuery)
+      this.$emit('query', newQuery)
     })
   }
 }
@@ -46,6 +46,7 @@ export default {
   height 40px
   background $color-highlight-background
   border-radius 6px
+  touch-action none
   .icon-search
     font-size 24px
     color $color-background
