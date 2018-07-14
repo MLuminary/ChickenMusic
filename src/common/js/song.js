@@ -51,7 +51,7 @@ export function createSong(musicData, songVkey) {
 }
 
 // 对于多个歌手拼接成字符串中间用 / 隔开
-function filterSinger(singer) {
+export function filterSinger(singer) {
   let ret = []
   if (!singer) {
     return ''
