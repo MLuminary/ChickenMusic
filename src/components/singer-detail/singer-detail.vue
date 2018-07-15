@@ -46,7 +46,6 @@ export default {
         }
       })
     },
-
     _normalizeSongs(list) {
       let ret = []
       list.forEach(item => {
@@ -62,6 +61,7 @@ export default {
           })
         }
       })
+      console.log('dtest')
       return ret
     }
   }
