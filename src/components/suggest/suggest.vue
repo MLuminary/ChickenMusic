@@ -25,7 +25,8 @@ export default {
   data() {
     return {
       page: 1,
-      result: []
+      result: [],
+      Lresult: [] // 避免因异步造成的数组为空清空
     }
   },
   props: {
@@ -43,44 +44,33 @@ export default {
       // 搜索接口
       search(this.query, this.page, this.showSinger).then(res => {
         if (res.code === ERR_OK) {
-          this._genResult(res.data).then(res => {
-            this.result = res
-          })
+          this._genResult(res.data)
         }
       })
     },
     // 将歌手和歌曲存入一个数组
     _genResult(data) {
-      let ret = []
       if (data.zhida && data.zhida.singerid) {
-        ret.push({ ...data.zhida, ...{ type: TYPE_SINGER } })
+        this.result.push({ ...data.zhida, ...{ type: TYPE_SINGER } })
       }
       if (data.song) {
-        return this._normalizeSongs(data.song.list).then(res => {
-          return ret.concat(res)
-        })
+        this.Lresult = this._normalizeSongs(data.song.list)
       }
     },
     _normalizeSongs(list) {
       let ret = []
-      let musicDatas = []
       // 将其中全部转换为 promise 存在数组中
-      var arr = list.map(musicData => {
+      list.forEach(musicData => {
         if (musicData.songid && musicData.albummid) {
-          musicDatas.push(musicData)
-          return getMusicSource(musicData.songmid)
+          getMusicSource(musicData.songmid).then(res => {
+            if (res.code === ERR_OK) {
+              const songVkey = res.data.items[0].vkey
+              ret.push(createSong(musicData, songVkey))
+            }
+          })
         }
       })
-      // 收集所有回调函数的内容
-      return Promise.all(arr).then(value => {
-        value.forEach((item, index) => {
-          if (item && musicDatas[index]) {
-            const songVkey = item.data.items[0].vkey
-            ret.push(createSong(musicDatas[index], songVkey))
-          }
-        })
-        return ret
-      })
+      return ret
     },
     getIconCls(item) {
       if (item.type === TYPE_SINGER) {
@@ -100,6 +90,9 @@ export default {
   watch: {
     query() {
       this.search()
+    },
+    Lresult(newValue) {
+      this.result = this.result.concat(newValue)
     }
   }
 }
