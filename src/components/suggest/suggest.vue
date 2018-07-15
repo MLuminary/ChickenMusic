@@ -1,6 +1,12 @@
 <template>
-  <div class="suggest">
+  <scroll
+    class="suggest"
+    :data="result"
+    :pullup="pullup"
+    @scrollToEnd="searchMore"
+    ref="suggest">
     <ul class="suggest-list">
+      <!-- 在这里解决异步问题 result.concat(Lresult) -->
       <li class="suggest-item" v-for="(item, index) in result" :key="index">
         <div class="icon">
           <i :class="getIconCls(item)"></i>
@@ -9,8 +15,10 @@
           <p class="text" v-html="getDisplayName(item)"></p>
         </div>
       </li>
+      <loading v-show="hasMore"></loading>
     </ul>
-  </div>
+
+  </scroll>
 </template>
 
 <script type="text/ecmascript-6">
@@ -18,15 +26,20 @@ import { search } from 'api/search'
 import { ERR_OK } from 'api/config'
 import { createSong } from 'common/js/song'
 import { getMusicSource } from 'api/song'
+import Scroll from 'base/scroll/scroll'
+import Loading from 'base/loading/loading'
 
 const TYPE_SINGER = 'singer'
+const PERPAGE = 20
 
 export default {
   data() {
     return {
       page: 1,
       result: [],
-      Lresult: [] // 避免因异步造成的数组为空清空
+      Lresult: [], // 避免因异步造成的数组为空清空
+      pullup: true, // 需要上拉刷新
+      hasMore: true // 可以加载更多
     }
   },
   props: {
@@ -39,18 +52,55 @@ export default {
       default: true
     }
   },
+  components: {
+    Scroll,
+    Loading
+  },
   methods: {
     search() {
+      // query 改变时，初始化数据
+      this.page = 1
+      this.hasMore = true
+      this.result = []
+      this.$refs.suggest.scrollTo(0, 0)
       // 搜索接口
-      search(this.query, this.page, this.showSinger).then(res => {
+      search(this.query, this.page, this.showSinger, PERPAGE).then(res => {
         if (res.code === ERR_OK) {
+          // 将数组处理合并成最终可赋值的结果
           this._genResult(res.data)
+          // 检查是否可以再次查找
+          this._checkMore(res.data)
         }
       })
     },
+    searchMore() {
+      if (!this.hasMore) {
+        return
+      }
+      this.page++
+      search(this.query, this.page, this.showSinger, PERPAGE).then(res => {
+        if (res.code === ERR_OK) {
+          // 将数组处理合并成最终可赋值的结果
+          this._genResult(res.data)
+          // 检查是否可以再次查找
+          this._checkMore(res.data)
+        }
+      })
+    },
+    _checkMore(data) {
+      const song = data.song
+      if (
+        !song.list.length ||
+        song.curnum + song.curpage * PERPAGE > song.totalnum
+      ) {
+        // 如果所有结果全部显示出来就置为 false
+        this.hasMore = false
+      }
+    },
     // 将歌手和歌曲存入一个数组
     _genResult(data) {
-      if (data.zhida && data.zhida.singerid) {
+      // 只在第一次加进歌手
+      if (data.zhida && data.zhida.singerid && this.page === 1) {
         this.result.push({ ...data.zhida, ...{ type: TYPE_SINGER } })
       }
       if (data.song) {
@@ -92,7 +142,10 @@ export default {
       this.search()
     },
     Lresult(newValue) {
-      this.result = this.result.concat(newValue)
+      let newV = newValue[newValue.length - 1]
+      if (newV) {
+        this.result.push(newV)
+      }
     }
   }
 }

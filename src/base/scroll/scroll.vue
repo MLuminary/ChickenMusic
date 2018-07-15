@@ -24,6 +24,11 @@ export default {
     listenScroll: {
       type: Boolean,
       default: false
+    },
+    // 是否开启上拉刷新
+    pullup: {
+      type: Boolean,
+      default: false
     }
   },
   mounted() {
@@ -41,12 +46,20 @@ export default {
         probeType: this.probeType,
         click: this.click
       })
-
+      // 是否开启监听滚动的xy值
       if (this.listenScroll) {
         let me = this
         // pos 为 ｛x,y｝
         this.scroll.on('scroll', pos => {
           me.$emit('scroll', pos)
+        })
+      }
+      // 上拉加载更多是否开启
+      if (this.pullup) {
+        this.scroll.on('scrollEnd', () => {
+          if (this.scroll.y <= this.scroll.maxScrollY + 50) {
+            this.$emit('scrollToEnd')
+          }
         })
       }
     },
