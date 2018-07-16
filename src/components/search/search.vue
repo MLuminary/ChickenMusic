@@ -14,7 +14,7 @@
       </div>
     </div>
     <div class="search-result" v-show="query">
-     <suggest @listScroll="blurInput" :query="query"></suggest>
+     <suggest @select="saveSearch" @listScroll="blurInput" :query="query"></suggest>
     </div>
     <router-view></router-view>
   </div>
@@ -25,6 +25,7 @@ import SearchBox from 'base/search-box/search-box'
 import { getHotKey } from 'api/search'
 import { ERR_OK } from 'api/config'
 import Suggest from 'components/suggest/suggest'
+import { mapActions } from 'vuex'
 
 export default {
   data() {
@@ -58,7 +59,15 @@ export default {
     // input失去焦点让键盘收回
     blurInput() {
       this.$refs.searchBox.blur()
-    }
+    },
+    // 保存搜索结果
+    saveSearch() {
+      // 存储在 vuex 中和 localStorage
+      this.saveSearchHistory(this.query)
+    },
+    ...mapActions([
+      'saveSearchHistory'
+    ])
   }
 }
 </script>

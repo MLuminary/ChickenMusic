@@ -1,6 +1,7 @@
 import * as types from './mutation-types'
 import { playMode } from 'common/js/config'
 import { shuffle } from 'common/js/util'
+import { saveSearch } from 'common/js/cache'
 
 function findIndex(list, song) {
   return list.findIndex(item => {
@@ -8,6 +9,7 @@ function findIndex(list, song) {
   })
 }
 
+// 选择歌曲
 export const selectPlay = function({ commit, state }, { list, index }) {
   // 调用修改 mutation 的方法
   commit(types.SET_SEQUENCE_LIST, list) // 添加到顺序加载列表中
@@ -24,6 +26,7 @@ export const selectPlay = function({ commit, state }, { list, index }) {
   commit(types.SET_PLAYING_STATE, true) // 播放
 }
 
+// 打乱歌曲
 export const randomPlay = function({ commit }, { list }) {
   commit(types.SET_PLAY_MODE, playMode.random)
   commit(types.SET_SEQUENCE_LIST, list)
@@ -34,6 +37,7 @@ export const randomPlay = function({ commit }, { list }) {
   commit(types.SET_PLAYING_STATE, true)
 }
 
+// 插入歌曲
 export const insertSong = function({ commit, state }, song) {
   let playList = state.playList.slice()
   let sequenceList = state.sequenceList.slice()
@@ -74,4 +78,9 @@ export const insertSong = function({ commit, state }, song) {
   commit(types.SET_CURRENT_INDEX, currentIndex)
   commit(types.SET_FULL_SCREEN, true)
   commit(types.SET_PLAYING_STATE, true)
+}
+
+// 保存搜索历史
+export const saveSearchHistory = function({ commit }, query) {
+  commit(types.SET_SEARCH_HISTORY, saveSearch(query))
 }
