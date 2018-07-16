@@ -39,7 +39,32 @@ export function saveSearch(query) {
   return searches
 }
 
+// 删除搜索历史数组中的某个值
+export function deleteFromArray(arr, compare) {
+  const index = arr.findIndex(compare)
+  if (index > -1) {
+    arr.splice(index, 1)
+  }
+}
+
 // 获取 storage 中的搜索历史值
 export function loadSearch() {
   return storage.get(SEARCH_KEY, [])
+}
+
+// 删除搜索历史数组中的某个值并返回当前历史搜索数组
+export function deleteSearch(query) {
+  let searches = storage.get(SEARCH_KEY, [])
+  deleteFromArray(searches, item => {
+    return item === query
+  })
+  // 设置 storage
+  storage.set(SEARCH_KEY, searches)
+  return searches
+}
+
+// 清空缓存
+export function clearSearch() {
+  storage.remove(SEARCH_KEY)
+  return []
 }

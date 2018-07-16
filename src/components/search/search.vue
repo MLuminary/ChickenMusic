@@ -11,6 +11,15 @@
             <li @click="addQuery(item.k)" v-for="(item, index) in hotKey" :key="index" class="item">{{item.k}}</li>
           </ul>
         </div>
+        <div class="search-history" v-show="searchHistory.length">
+          <h1 class="title">
+            <span class="text">搜索历史</span>
+            <span class="clear" @click="clearSearchHistory">
+              <i class="icon-clear"></i>
+            </span>
+          </h1>
+          <search-list @select="addQuery" @delete="deleteSearchHistory" :searches="searchHistory"></search-list>
+        </div>
       </div>
     </div>
     <div class="search-result" v-show="query">
@@ -25,7 +34,8 @@ import SearchBox from 'base/search-box/search-box'
 import { getHotKey } from 'api/search'
 import { ERR_OK } from 'api/config'
 import Suggest from 'components/suggest/suggest'
-import { mapActions } from 'vuex'
+import { mapActions, mapGetters } from 'vuex'
+import SearchList from 'base/search-list/search-list'
 
 export default {
   data() {
@@ -36,7 +46,11 @@ export default {
   },
   components: {
     SearchBox,
-    Suggest
+    Suggest,
+    SearchList
+  },
+  computed: {
+    ...mapGetters(['searchHistory'])
   },
   created() {
     this._getHotKey()
@@ -65,9 +79,7 @@ export default {
       // 存储在 vuex 中和 localStorage
       this.saveSearchHistory(this.query)
     },
-    ...mapActions([
-      'saveSearchHistory'
-    ])
+    ...mapActions(['saveSearchHistory', 'deleteSearchHistory', 'clearSearchHistory'])
   }
 }
 </script>
@@ -76,7 +88,7 @@ export default {
 @import '~common/stylus/variable'
 @import '~common/stylus/mixin'
 .search
-  touch-action: none
+  touch-action none
   .search-box-wrapper
     margin 20px
   .shortcut-wrapper
