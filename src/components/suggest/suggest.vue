@@ -4,10 +4,12 @@
     :data="result"
     :pullup="pullup"
     @scrollToEnd="searchMore"
+    :beforeScroll="beforeScroll"
+    @beforeScroll="listScroll"
     ref="suggest">
     <ul class="suggest-list">
       <!-- 在这里解决异步问题 result.concat(Lresult) -->
-      <li class="suggest-item" v-for="(item, index) in result" :key="index">
+      <li class="suggest-item" @click="selectItem(item)" v-for="(item, index) in result" :key="index">
         <div class="icon">
           <i :class="getIconCls(item)"></i>
         </div>
@@ -17,7 +19,9 @@
       </li>
       <loading v-show="hasMore"></loading>
     </ul>
-
+    <div class="no-result-wrapper" v-show="!hasMore && !result.length">
+      <no-result title="抱歉，暂无搜索结果"></no-result>
+    </div>
   </scroll>
 </template>
 
@@ -28,6 +32,9 @@ import { createSong } from 'common/js/song'
 import { getMusicSource } from 'api/song'
 import Scroll from 'base/scroll/scroll'
 import Loading from 'base/loading/loading'
+import Singer from 'common/js/singer'
+import NoResult from 'base/no-result/no-result'
+import { mapMutations, mapActions } from 'vuex'
 
 const TYPE_SINGER = 'singer'
 const PERPAGE = 20
@@ -39,7 +46,8 @@ export default {
       result: [],
       Lresult: [], // 避免因异步造成的数组为空清空
       pullup: true, // 需要上拉刷新
-      hasMore: true // 可以加载更多
+      hasMore: true, // 可以加载更多
+      beforeScroll: true
     }
   },
   props: {
@@ -54,7 +62,8 @@ export default {
   },
   components: {
     Scroll,
-    Loading
+    Loading,
+    NoResult
   },
   methods: {
     search() {
@@ -86,6 +95,21 @@ export default {
           this._checkMore(res.data)
         }
       })
+    },
+    selectItem(item) {
+      if (item.type === TYPE_SINGER) {
+        let singer = new Singer(item.singermid, item.singername)
+        this.$router.push({
+          path: `/search/${singer.id}`
+        })
+
+        this.setSinger(singer)
+      } else {
+        this.insertSong(item)
+      }
+    },
+    listScroll() {
+      this.$emit('listScroll')
     },
     _checkMore(data) {
       const song = data.song
@@ -135,7 +159,11 @@ export default {
       } else {
         return `${item.name}-${item.singer}`
       }
-    }
+    },
+    ...mapMutations({
+      setSinger: 'SET_SINGER'
+    }),
+    ...mapActions(['insertSong'])
   },
   watch: {
     query() {

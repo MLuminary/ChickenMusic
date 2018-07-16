@@ -14,8 +14,9 @@
       </div>
     </div>
     <div class="search-result" v-show="query">
-     <suggest :query="query"></suggest>
+     <suggest @listScroll="blurInput" :query="query"></suggest>
     </div>
+    <router-view></router-view>
   </div>
 </template>
 
@@ -53,6 +54,10 @@ export default {
     },
     onQueryChange(newQuery) {
       this.query = newQuery
+    },
+    // input失去焦点让键盘收回
+    blurInput() {
+      this.$refs.searchBox.blur()
     }
   }
 }
