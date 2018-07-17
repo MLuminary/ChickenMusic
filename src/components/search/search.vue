@@ -67,7 +67,7 @@ export default {
   watch: {
     query(newValue) {
       if (!newValue) {
-        setTimeout(()=>{
+        setTimeout(() => {
           this.$refs.shortcut.refresh()
         })
       }
