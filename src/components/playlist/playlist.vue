@@ -11,8 +11,8 @@
         </div>
         <scroll ref="listContent" class="list-content">
           <ul ref="list">
-            <li class="item" v-for="(item, index) in sequenceList" :key="index">
-              <i class="current"></i>
+            <li class="item" v-for="(item, index) in sequenceList" :key="index" @click="selectItem(item, index)">
+              <i class="current" :class="getCurrentIcon(item)"></i>
               <span class="text">{{item.name}}</span>
               <span class="like">
                 <i></i>
@@ -41,12 +41,12 @@
 
 <script type="text/ecmascript-6">
 // import { mapActions } from 'vuex'
-// import { playMode } from 'common/js/config'
+import { playMode } from 'common/js/config'
 import Scroll from 'base/scroll/scroll'
 // import Confirm from 'base/confirm/confirm'
 // import AddSong from 'components/add-song/add-song'
 // import { playerMixin } from 'common/js/mixin'
-import { mapGetters } from 'vuex'
+import { mapGetters, mapMutations } from 'vuex'
 
 export default {
   // mixins: [playerMixin],
@@ -56,7 +56,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['sequenceList'])
+    ...mapGetters(['sequenceList', 'currentSong', 'playList'])
   },
   methods: {
     show() {
@@ -68,7 +68,28 @@ export default {
     },
     hidden() {
       this.showFlag = false
-    }
+    },
+    getCurrentIcon(item) {
+      if (item.id === this.currentSong.id) {
+        return 'icon-play'
+      } else {
+        return ''
+      }
+    },
+    // 点击列表歌单
+    selectItem(item, index) {
+      if (this.mode === playMode.random) {
+        index = this.sequenceList.findIndex(song => {
+          return song.id === item.id
+        })
+      }
+      this.setCurrentIndex(index)
+      this.setPlaying(true)
+    },
+    ...mapMutations({
+      setCurrentIndex: 'SET_CURRENT_INDEX',
+      setPlaying: 'SET_PLAYING_STATE'
+    })
   },
   watch: {},
   components: {
