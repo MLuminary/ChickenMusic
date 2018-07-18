@@ -11,7 +11,7 @@
         </div>
         <scroll ref="listContent" class="list-content">
           <ul ref="list">
-            <li class="item" v-for="(item, index) in sequenceList" :key="index" @click="selectItem(item, index)">
+            <li ref="listItem" class="item" v-for="(item, index) in sequenceList" :key="index" @click="selectItem(item, index)">
               <i class="current" :class="getCurrentIcon(item)"></i>
               <span class="text">{{item.name}}</span>
               <span class="like">
@@ -56,7 +56,7 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['sequenceList', 'currentSong', 'playList'])
+    ...mapGetters(['sequenceList', 'currentSong', 'playList', 'mode'])
   },
   methods: {
     show() {
@@ -64,6 +64,8 @@ export default {
       this.showFlag = true
       setTimeout(() => {
         this.$refs.listContent.refresh()
+        // 跳转到当前播放歌曲
+        this.scrollToCurrent(this.currentSong)
       })
     },
     hidden() {
@@ -78,20 +80,36 @@ export default {
     },
     // 点击列表歌单
     selectItem(item, index) {
+      // 如果是随机播放
       if (this.mode === playMode.random) {
-        index = this.sequenceList.findIndex(song => {
+        // 找到当前播放歌曲的 Id 在 playlist中的数据
+        index = this.playList.findIndex(song => {
           return song.id === item.id
         })
       }
       this.setCurrentIndex(index)
-      this.setPlaying(true)
+      this.setPlayingState(true)
+    },
+    scrollToCurrent(current) {
+      // 找到当前播放歌曲在 sequenceList 中的位置
+      const index = this.sequenceList.findIndex(song => {
+        return current.id === song.id
+      })
+      this.$refs.listContent.scrollToElement(this.$refs.listItem[index], 300)
     },
     ...mapMutations({
       setCurrentIndex: 'SET_CURRENT_INDEX',
-      setPlaying: 'SET_PLAYING_STATE'
+      setPlayingState: 'SET_PLAYING_STATE'
     })
   },
-  watch: {},
+  watch: {
+    currentSong(newSong, oldSong) {
+      if (!this.showFlag || newSong.id === oldSong.id) {
+        return
+      }
+      this.scrollToCurrent(newSong)
+    }
+  },
   components: {
     Scroll
   }
