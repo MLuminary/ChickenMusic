@@ -61,7 +61,6 @@ export default {
           })
         }
       })
-      console.log('dtest')
       return ret
     }
   }
