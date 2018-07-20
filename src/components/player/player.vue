@@ -98,16 +98,17 @@ import { prefixStyle } from 'common/js/dom'
 import ProgressBar from 'base/progress-bar/progress-bar'
 import ProgressCircle from 'base/progress-circle/progress-circle'
 import { playMode } from 'common/js/config'
-import { shuffle } from 'common/js/util'
 import Lyric from 'lyric-parser'
 import Scroll from 'base/scroll/scroll'
 import PlayList from 'components/playlist/playlist'
+import { playerMixin } from 'common/js/mixin'
 
 const transform = prefixStyle('transform')
 // 使用此方法造成了滑动的卡顿
 const transition = prefixStyle('transition')
 
 export default {
+  mixins: [ playerMixin ],
   data() {
     return {
       songReady: false, // 避免点击过快
@@ -135,19 +136,10 @@ export default {
     percent() {
       return this.currentTime / this.currentSong.duration
     },
-    iconMode() {
-      return this.mode === playMode.sequence
-        ? 'icon-sequence'
-        : this.mode === playMode.loop ? 'icon-loop' : 'icon-random'
-    },
     ...mapGetters([
       'fullScreen',
-      'playList',
-      'currentSong',
       'playing',
-      'currentIndex',
-      'mode',
-      'sequenceList'
+      'currentIndex'
     ])
   },
   components: {
@@ -277,28 +269,6 @@ export default {
       // 显示当前正在播放的歌词
       this.playingLyric = txt
     },
-    // 改变播放模式
-    changeMode() {
-      const mode = (this.mode + 1) % 3
-      this.setPlayMode(mode)
-
-      let list = null
-      if (mode === playMode.random) {
-        list = shuffle(this.sequenceList)
-      } else {
-        list = this.sequenceList
-      }
-      this.resetCurrentIndex(list)
-      this.setPlayList(list) // 将此时的 sequenceList 设为 playList
-    },
-    // 保证切换模式的时候歌曲保持不变
-    resetCurrentIndex(list) {
-      // 找到当前播放歌曲的索引
-      let index = list.findIndex(item => {
-        return item.id === this.currentSong.id
-      })
-      this.setCurrentIndex(index)
-    },
     // 变为 miniplay
     back() {
       this.setFullScreen(false)
@@ -309,10 +279,7 @@ export default {
     },
     ...mapMutations({
       setFullScreen: 'SET_FULL_SCREEN',
-      setPlayingState: 'SET_PLAYING_STATE',
-      setCurrentIndex: 'SET_CURRENT_INDEX',
-      setPlayMode: 'SET_PLAY_MODE',
-      setPlayList: 'SET_PLAYLIST'
+      setPlayingState: 'SET_PLAYING_STATE'
     }),
     next() {
       // 当播放列表只剩一个歌曲时，点击下一首自动重复播放
