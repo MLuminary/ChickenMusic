@@ -107,8 +107,8 @@ export const deleteSong = function({ commit, state }, song) {
   let sIndex = findIndex(sequenceList, song)
   sequenceList.splice(sIndex, 1)
 
-  // 当删除的歌曲在播放歌曲之前时，要改变 currentIndex
-  if (pIndex <= currentIndex) {
+  // 当删除的歌曲在播放歌曲之前，或是正在播放的歌曲是在当前播放歌单的最后一首
+  if (pIndex < currentIndex || currentIndex === playList.length) {
     currentIndex--
   }
 
@@ -116,8 +116,14 @@ export const deleteSong = function({ commit, state }, song) {
   commit(types.SET_SEQUENCE_LIST, sequenceList)
   commit(types.SET_CURRENT_INDEX, currentIndex)
 
-  // 歌单全部删除 停止放歌
-  if (!playList.length) {
-    commit(types.SET_PLAYING_STATE, false)
-  }
+  // 歌单全部删除 停止放歌,当列表还有歌曲时可以播放
+  const playingState = playList.length > 0
+  commit(types.SET_PLAYING_STATE, playingState)
+}
+
+export const deleteSongList = function({ commit, state }, song) {
+  commit(types.SET_PLAYLIST, [])
+  commit(types.SET_SEQUENCE_LIST, [])
+  commit(types.SET_CURRENT_INDEX, -1)
+  commit(types.SET_PLAYING_STATE, false)
 }

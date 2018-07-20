@@ -161,6 +161,10 @@ export default {
   },
   watch: {
     currentSong(newSong, oldSong) {
+      // 如果删除歌曲为最后一首，也就没有了 newSong.id
+      if (!newSong.id) {
+        return
+      }
       // 切换播放模式时歌曲播放状态不能改变
       if (newSong.id === oldSong.id) {
         return
