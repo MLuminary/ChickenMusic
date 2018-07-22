@@ -92,7 +92,7 @@
 </template>
 
 <script type="text/ecmascript-6">
-import { mapGetters, mapMutations } from 'vuex'
+import { mapGetters, mapMutations, mapActions } from 'vuex'
 import animations from 'create-keyframe-animation'
 import { prefixStyle } from 'common/js/dom'
 import ProgressBar from 'base/progress-bar/progress-bar'
@@ -108,7 +108,7 @@ const transform = prefixStyle('transform')
 const transition = prefixStyle('transition')
 
 export default {
-  mixins: [ playerMixin ],
+  mixins: [playerMixin],
   data() {
     return {
       songReady: false, // 避免点击过快
@@ -136,11 +136,7 @@ export default {
     percent() {
       return this.currentTime / this.currentSong.duration
     },
-    ...mapGetters([
-      'fullScreen',
-      'playing',
-      'currentIndex'
-    ])
+    ...mapGetters(['fullScreen', 'playing', 'currentIndex'])
   },
   components: {
     ProgressBar,
@@ -203,7 +199,10 @@ export default {
       }
       // 如果是 cd 页面，其 left 值为 0，若为 lyric 为负的屏幕宽度
       const left = this.currentShow === 'cd' ? 0 : -window.innerWidth
-      const offsetwidth = Math.min(0, Math.max(-window.innerWidth, left + deltaX))
+      const offsetwidth = Math.min(
+        0,
+        Math.max(-window.innerWidth, left + deltaX)
+      )
       this.touch.percent = Math.abs(offsetwidth / window.innerWidth)
       this.$refs.lyricList.$el.style[transition] = '0s'
       this.$refs.lyricList.$el.style[transform] = `translate3d(${offsetwidth}px, 0, 0)`
@@ -240,22 +239,25 @@ export default {
     },
     // 获得歌词
     getLyric() {
-      this.currentSong.getLyric().then(lyric => {
-        // this.currentLyric 改变后调用 handleLyric
-        // 内置定时器，根据 Lyric 中的 time 改变歌词中的 Line
-        this.currentLyric = new Lyric(lyric, this.handleLyric)
-        if (this.playing) {
-          this.currentLyric.play()
-        }
-      }).catch(() => {
-        // 当没有获取到歌词时，做一些清理工作
-        this.currentLyric = null
-        this.playingLyric = ''
-        this.currentLineNum = 0
-      })
+      this.currentSong
+        .getLyric()
+        .then(lyric => {
+          // this.currentLyric 改变后调用 handleLyric
+          // 内置定时器，根据 Lyric 中的 time 改变歌词中的 Line
+          this.currentLyric = new Lyric(lyric, this.handleLyric)
+          if (this.playing) {
+            this.currentLyric.play()
+          }
+        })
+        .catch(() => {
+          // 当没有获取到歌词时，做一些清理工作
+          this.currentLyric = null
+          this.playingLyric = ''
+          this.currentLineNum = 0
+        })
     },
     // 歌词改变的回调函数
-    handleLyric({lineNum, txt}) {
+    handleLyric({ lineNum, txt }) {
       this.currentLineNum = lineNum
       // 歌词滚动
       if (lineNum > 5) {
@@ -277,10 +279,6 @@ export default {
     open() {
       this.setFullScreen(true)
     },
-    ...mapMutations({
-      setFullScreen: 'SET_FULL_SCREEN',
-      setPlayingState: 'SET_PLAYING_STATE'
-    }),
     next() {
       // 当播放列表只剩一个歌曲时，点击下一首自动重复播放
       if (this.playList.length === 1) {
@@ -347,6 +345,7 @@ export default {
     // audio 准备好后会调用此函数
     ready() {
       this.songReady = true
+      this.savePlayHistory(this.currentSong)
     },
     // 歌曲加载失败
     error() {
@@ -435,7 +434,12 @@ export default {
       const x = -(window.innerWidth / 2 - paddingLeft)
       const y = window.innerHeight - paddingTop - width / 2 - paddingBottom
       return { x, y, scale }
-    }
+    },
+    ...mapMutations({
+      setFullScreen: 'SET_FULL_SCREEN',
+      setPlayingState: 'SET_PLAYING_STATE'
+    }),
+    ...mapActions(['savePlayHistory'])
   }
 }
 </script>
