@@ -30,12 +30,12 @@
       <div class="search-result" v-show="query">
         <suggest :query="query" :showSinger="showSinger" @select="selectSuggest" @listScroll="blurInput"></suggest>
       </div>
-      <!-- <top-tip ref="topTip">
+      <top-tip ref="topTip">
         <div class="tip-title">
           <i class="icon-ok"></i>
           <span class="text">1首歌曲已经添加到播放列表</span>
         </div>
-      </top-tip> -->
+      </top-tip>
     </div>
   </transition>
 </template>
@@ -48,6 +48,7 @@ import Switches from 'base/switches/switches'
 import Scroll from 'base/scroll/scroll'
 import Song from 'common/js/song'
 import SearchList from 'base/search-list/search-list'
+import TopTip from 'base/top-tip/top-tip'
 import { searchMixin } from 'common/js/mixin'
 import { mapGetters, mapActions } from 'vuex'
 
@@ -80,6 +81,8 @@ export default {
     },
     selectSuggest() {
       this.search()
+      // 开启提示
+      this.showTip()
     },
     switchItem(index) {
       this.currentIndex = index
@@ -89,6 +92,11 @@ export default {
       if (index !== 0) {
         this.insertSong(new Song(song))
       }
+      // 开启提示
+      this.showTip()
+    },
+    showTip() {
+      this.$refs.topTip.show()
     },
     ...mapActions(['insertSong'])
   },
@@ -98,7 +106,8 @@ export default {
     Switches,
     Scroll,
     SongList,
-    SearchList
+    SearchList,
+    TopTip
   }
 }
 </script>
