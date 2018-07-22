@@ -19,12 +19,12 @@
               </song-list>
             </div>
           </scroll>
-          <!-- <scroll :refreshDelay="refreshDelay" ref="searchList" v-if="currentIndex===1" class="list-scroll"
+          <scroll :refreshDelay="refreshDelay" ref="searchList" v-if="currentIndex===1" class="list-scroll"
                   :data="searchHistory">
             <div class="list-inner">
               <search-list @delete="deleteSearchHistory" @select="addQuery" :searches="searchHistory"></search-list>
             </div>
-          </scroll> -->
+          </scroll>
         </div>
       </div>
       <div class="search-result" v-show="query">
@@ -46,9 +46,10 @@ import Suggest from 'components/suggest/suggest'
 import SongList from 'base/song-list/song-list'
 import Switches from 'base/switches/switches'
 import Scroll from 'base/scroll/scroll'
+import Song from 'common/js/song'
+import SearchList from 'base/search-list/search-list'
 import { searchMixin } from 'common/js/mixin'
 import { mapGetters, mapActions } from 'vuex'
-import Song from 'common/js/song'
 
 export default {
   mixins: [searchMixin],
@@ -66,6 +67,13 @@ export default {
   methods: {
     show() {
       this.showFlag = true
+      setTimeout(() => {
+        if (this.currentIndex === 0) {
+          this.$refs.songList.refresh()
+        } else {
+          this.$refs.searchList.refresh()
+        }
+      })
     },
     hide() {
       this.showFlag = false
@@ -89,7 +97,8 @@ export default {
     Suggest,
     Switches,
     Scroll,
-    SongList
+    SongList,
+    SearchList
   }
 }
 </script>
