@@ -1,4 +1,4 @@
-import { mapGetters, mapMutations } from 'vuex'
+import { mapGetters, mapMutations, mapActions } from 'vuex'
 import { playMode } from 'common/js/config'
 import { shuffle } from 'common/js/util'
 
@@ -65,5 +65,35 @@ export const playerMixin = {
       setPlayList: 'SET_PLAYLIST',
       setCurrentIndex: 'SET_CURRENT_INDEX'
     })
+  }
+}
+
+export const searchMixin = {
+  data() {
+    return {
+      query: ''
+    }
+  },
+  computed: {
+    ...mapGetters(['searchHistory'])
+  },
+  methods: {
+    // input失去焦点让键盘收回
+    blurInput() {
+      this.$refs.searchBox.blur()
+    },
+    onQueryChange(newQuery) {
+      this.query = newQuery
+    },
+    // 点击热门关键词赋值到 searchBox
+    addQuery(query) {
+      this.$refs.searchBox.setQuery(query)
+    },
+    // 保存搜索结果
+    saveSearch() {
+      // 存储在 vuex 中和 localStorage
+      this.saveSearchHistory(this.query)
+    },
+    ...mapActions(['saveSearchHistory', 'deleteSearchHistory'])
   }
 }

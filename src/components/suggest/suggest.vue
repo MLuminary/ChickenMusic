@@ -109,6 +109,7 @@ export default {
       }
       this.$emit('select')
     },
+    // 将要滚动之前派发的事件
     listScroll() {
       this.$emit('listScroll')
     },

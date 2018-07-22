@@ -37,18 +37,17 @@ import SearchBox from 'base/search-box/search-box'
 import { getHotKey } from 'api/search'
 import { ERR_OK } from 'api/config'
 import Suggest from 'components/suggest/suggest'
-import { mapActions, mapGetters } from 'vuex'
+import { mapActions } from 'vuex'
 import SearchList from 'base/search-list/search-list'
 import Confirm from 'base/confirm/confirm'
 import Scroll from 'base/scroll/scroll'
-import { playListMixin } from 'common/js/mixin'
+import { playListMixin, searchMixin } from 'common/js/mixin'
 
 export default {
-  mixins: [playListMixin],
+  mixins: [playListMixin, searchMixin],
   data() {
     return {
-      hotKey: [],
-      query: ''
+      hotKey: []
     }
   },
   components: {
@@ -59,7 +58,6 @@ export default {
     Scroll
   },
   computed: {
-    ...mapGetters(['searchHistory']),
     shortcut() {
       return this.hotKey.concat(this.saveSearchHistory)
     }
@@ -91,28 +89,10 @@ export default {
         }
       })
     },
-    // 点击热门关键词赋值到 searchBox
-    addQuery(query) {
-      this.$refs.searchBox.setQuery(query)
-    },
-    onQueryChange(newQuery) {
-      this.query = newQuery
-    },
-    // input失去焦点让键盘收回
-    blurInput() {
-      this.$refs.searchBox.blur()
-    },
-    // 保存搜索结果
-    saveSearch() {
-      // 存储在 vuex 中和 localStorage
-      this.saveSearchHistory(this.query)
-    },
     showConfirm() {
       this.$refs.confirm.show()
     },
     ...mapActions([
-      'saveSearchHistory',
-      'deleteSearchHistory',
       'clearSearchHistory'
     ])
   }
