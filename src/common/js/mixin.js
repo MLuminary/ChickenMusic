@@ -28,7 +28,13 @@ export const playListMixin = {
 
 export const playerMixin = {
   computed: {
-    ...mapGetters(['sequenceList', 'currentSong', 'playList', 'mode']),
+    ...mapGetters([
+      'sequenceList',
+      'currentSong',
+      'playList',
+      'mode',
+      'favoriteList'
+    ]),
     iconMode() {
       return this.mode === playMode.sequence
         ? 'icon-sequence'
@@ -60,11 +66,34 @@ export const playerMixin = {
       })
       this.setCurrentIndex(index)
     },
+    // 更换此歌曲最喜爱或正常
+    toggleFavorite(song) {
+      if (this.isFavoriteSong(song)) {
+        this.deleteFavoriteList(song)
+      } else {
+        this.saveFavoriteList(song)
+      }
+    },
+    // 获得最喜爱或者正常的 class
+    getFavoriteIcon(song) {
+      if (this.isFavoriteSong(song)) {
+        return 'icon-favorite'
+      }
+      return 'icon-not-favorite'
+    },
+    // 判断是否是最喜欢的歌曲
+    isFavoriteSong(song) {
+      let index = this.favoriteList.findIndex(item => {
+        return item.id === song.id
+      })
+      return index > -1
+    },
     ...mapMutations({
       setPlayMode: 'SET_PLAY_MODE',
       setPlayList: 'SET_PLAYLIST',
       setCurrentIndex: 'SET_CURRENT_INDEX'
-    })
+    }),
+    ...mapActions(['saveFavoriteList', 'deleteFavoriteList'])
   }
 }
 
