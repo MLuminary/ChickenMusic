@@ -12,7 +12,17 @@
         <span class="text">随机播放全部</span>
       </div>
       <div class="list-wrapper" ref="listWrapper">
-
+        <scroll ref="songList" v-if="currentIndex===0" class="list-scroll" :data="favoriteList">
+          <div class="list-inner">
+            <song-list :songs="favoriteList" @select="selectSong"></song-list>
+          </div>
+        </scroll>
+        <scroll ref="searchList" v-if="currentIndex===1" class="list-scroll"
+                :data="playHistory">
+          <div class="list-inner">
+            <song-list :songs="playHistory" @select="selectSong"></song-list>
+          </div>
+        </scroll>
       </div>
       <div class="no-result-wrapper">
 
@@ -23,11 +33,11 @@
 
 <script type="text/ecmascript-6">
 import Switches from 'base/switches/switches'
-// import Scroll from 'base/scroll/scroll'
-// import SongList from 'base/song-list/song-list'
+import Scroll from 'base/scroll/scroll'
+import SongList from 'base/song-list/song-list'
 // import NoResult from 'base/no-result/no-result'
-// import Song from 'common/js/song'
-// import {mapGetters, mapActions} from 'vuex'
+import Song from 'common/js/song'
+import { mapGetters, mapActions } from 'vuex'
 // import {playlistMixin} from 'common/js/mixin'
 
 export default {
@@ -45,17 +55,27 @@ export default {
       ]
     }
   },
-  computed: {},
+  computed: {
+    ...mapGetters(['favoriteList', 'playHistory'])
+  },
   methods: {
     switchItem(index) {
       this.currentIndex = index
     },
     back() {
       this.$router.back()
-    }
+    },
+    selectSong(song) {
+      this.insertSong(new Song(song))
+    },
+    ...mapActions([
+      'insertSong'
+    ])
   },
   components: {
-    Switches
+    Switches,
+    SongList,
+    Scroll
   }
 }
 </script>
