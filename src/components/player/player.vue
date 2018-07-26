@@ -87,7 +87,7 @@
       </div>
     </transition>
     <play-list ref="playlist"></play-list>
-    <audio ref="audio" :src="currentSong.url" @canplay="ready" @error="error" @timeupdate="updateTime" @ended="end"></audio>
+    <audio ref="audio" :src="currentSong.url" @play="ready" @error="error" @timeupdate="updateTime" @ended="end"></audio>
   </div>
 </template>
 
@@ -160,9 +160,14 @@ export default {
       if (this.currentLyric) {
         // 避免产生多个定时器
         this.currentLyric.stop()
+        this.currentTime = 0
+        this.playingLyric = ''
+        this.currentLineNum = 0
       }
+
       // 微信从后台切到前台保证音频也可以正确播放
-      setTimeout(() => {
+      clearTimeout(this.timer)
+      this.timer = setTimeout(() => {
         this.$refs.audio.play()
         this.getLyric()
       }, 1000)
@@ -242,6 +247,10 @@ export default {
       this.currentSong
         .getLyric()
         .then(lyric => {
+          // 如果当前歌词不是当前歌词。。
+          if (this.currentSong.lyric !== lyric) {
+            return
+          }
           // this.currentLyric 改变后调用 handleLyric
           // 内置定时器，根据 Lyric 中的 time 改变歌词中的 Line
           this.currentLyric = new Lyric(lyric, this.handleLyric)
@@ -280,13 +289,14 @@ export default {
       this.setFullScreen(true)
     },
     next() {
+      if (!this.songReady) {
+        return
+      }
       // 当播放列表只剩一个歌曲时，点击下一首自动重复播放
       if (this.playList.length === 1) {
         this.loop()
+        return
       } else {
-        if (!this.songReady) {
-          return
-        }
         let index = this.currentIndex + 1
         if (index === this.playList.length) {
           index = 0
