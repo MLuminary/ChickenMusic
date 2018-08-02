@@ -295,7 +295,6 @@ export default {
       // 当播放列表只剩一个歌曲时，点击下一首自动重复播放
       if (this.playList.length === 1) {
         this.loop()
-        return
       } else {
         let index = this.currentIndex + 1
         if (index === this.playList.length) {
