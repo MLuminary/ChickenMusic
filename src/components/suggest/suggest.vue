@@ -74,11 +74,15 @@ export default {
       this.$refs.suggest.scrollTo(0, 0)
       // 搜索接口
       search(this.query, this.page, this.showSinger, PERPAGE).then(res => {
-        if (res.code === ERR_OK) {
+        let num1 = res.indexOf('(')
+        let num2 = res.lastIndexOf(')')
+        let resultData = JSON.parse(res.substring(num1 + 1, num2))
+
+        if (resultData.code === ERR_OK) {
           // 将数组处理合并成最终可赋值的结果
-          this._genResult(res.data)
+          this._genResult(resultData.data)
           // 检查是否可以再次查找
-          this._checkMore(res.data)
+          this._checkMore(resultData.data)
         }
       })
     },
@@ -129,7 +133,7 @@ export default {
     // 将歌手和歌曲存入一个数组
     _genResult(data) {
       // 只在第一次加进歌手
-      if (data.zhida && data.zhida.singerid && this.page === 1) {
+      if (data && data.zhida && data.zhida.singerid && this.page === 1) {
         this.result.push({ ...data.zhida, ...{ type: TYPE_SINGER } })
       }
       if (data.song) {

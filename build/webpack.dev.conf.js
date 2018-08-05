@@ -154,6 +154,30 @@ const devWebpackConfig = merge(baseWebpackConfig, {
             console.log(e)
           })
       })
+
+      // search结果
+      app.get('/api/getSearch', function(req, res) {
+        // qq 音乐获取 vkey
+        const url =
+          'https://c.y.qq.com/soso/fcgi-bin/search_for_qq_cp'
+
+        // 修改请求头去获取数据
+        axios
+          .get(url, {
+            headers: {
+              referer: ReqHeader.referer,
+              host: ReqHeader.host
+            },
+            params: req.query // 将发送过来的数据接收再当参数传递
+          })
+          .then(response => {
+            // 获取搜索结果
+            res.json(response.data)
+          })
+          .catch(e => {
+            console.log(e)
+          })
+      })
     }
   },
   plugins: [
